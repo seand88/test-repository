@@ -1,0 +1,16 @@
+/// <reference types="vitest" />
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    include: ['ClientApp/**/*.test.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      include: ['ClientApp/**/*'],
+      exclude: ['ClientApp/**/*.test.ts', 'ClientApp/models/**']
+    },
+  },
+})
