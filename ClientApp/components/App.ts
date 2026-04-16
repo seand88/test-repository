@@ -44,6 +44,14 @@ export class App extends Component<{}> {
             (path, name) => {
                 const url = this.storageService.getDownloadUrl(path);
                 this.audioPlayer.play(url, name);
+                
+                // We need a slight delay to ensure the <audio> element is in the DOM
+                setTimeout(() => {
+                    const audioElement = this.audioPlayer.getAudioElement();
+                    if (audioElement) {
+                        this.visualizer.connectAudio(audioElement);
+                    }
+                }, 100);
             },
             () => this.loadData(),
             (path) => this.storageService.getDownloadUrl(path)

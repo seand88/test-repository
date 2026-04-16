@@ -16,6 +16,10 @@ export class AudioPlayer extends Component<AudioPlayerState> {
         this.setState({ sourceUrl: url, fileName: fileName });
     }
 
+    public getAudioElement(): HTMLAudioElement | null {
+        return this.element.querySelector('#audio-element');
+    }
+
     public stop() {
         this.setState({ sourceUrl: null, fileName: '' });
     }
@@ -28,7 +32,7 @@ export class AudioPlayer extends Component<AudioPlayerState> {
         return `
             <div class="audio-player">
                 <span class="track-info">Now Playing: ${this.state.fileName}</span>
-                <audio controls autoplay src="${this.state.sourceUrl}" style="width: 100%;">
+                <audio id="audio-element" controls autoplay src="${this.state.sourceUrl}" style="width: 100%;" crossOrigin="anonymous">
                     Your browser does not support the audio element.
                 </audio>
             </div>

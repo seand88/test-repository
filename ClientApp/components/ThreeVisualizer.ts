@@ -6,16 +6,17 @@ export class ThreeVisualizer extends Component<{}> {
     private camera!: THREE.PerspectiveCamera;
     private renderer!: THREE.WebGLRenderer;
     private cubes: THREE.Mesh[] = [];
+    private analyser: THREE.AudioAnalyser | null = null;
+    private isAudioConnected = false;
 
     constructor() {
         super({});
-        // We need a <canvas> element, not the default <div> from the base class.
         this.element = document.createElement('canvas'); 
         this.element.id = 'three-visualizer-canvas';
         this.element.style.position = 'fixed';
         this.element.style.top = '0';
         this.element.style.left = '0';
-        this.element.style.zIndex = '-1'; // Put it behind all other content
+        this.element.style.zIndex = '-1';
     }
 
     // We don't render HTML, we mount a canvas
@@ -24,51 +25,58 @@ export class ThreeVisualizer extends Component<{}> {
     }
 
     public mount(container: HTMLElement) {
-        // Override mount to attach our canvas directly
         container.appendChild(this.element);
         this.initThree();
         this.animate();
     }
 
-    private initThree() {
-        // Scene
-        this.scene = new THREE.Scene();
+    public connectAudio(audioElement: HTMLAudioElement) {
+        if (this.isAudioConnected) return;
 
-        // Camera
+        const listener = new THREE.AudioListener();
+        const audio = new THREE.Audio(listener);
+        audio.setMediaElementSource(audioElement);
+        this.analyser = new THREE.AudioAnalyser(audio, 32); // 32 is the FFT size (must be power of 2)
+
+        this.isAudioConnected = true;
+    }
+
+    private initThree() {
+        this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.z = 5;
 
-        // Renderer
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.element as HTMLCanvasElement,
             antialias: true,
-            alpha: true // Transparent background
+            alpha: true
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-        // Handle window resize
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Add some basic lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        const ambientLight = new THREE.AmbientLight(0x404040, 1);
         this.scene.add(ambientLight);
-        const pointLight = new THREE.PointLight(0xffffff, 0.5);
+        const pointLight = new THREE.PointLight(0xffffff, 1);
         pointLight.position.set(2, 3, 4);
         this.scene.add(pointLight);
 
-        // Create a grid of cubes
-        const gridSize = 16;
+        const gridSize = 16; // Corresponds to half the FFT size (32 / 2)
         const cubeSize = 0.5;
-        const spacing = 0.1;
+        const spacing = 0.2;
         const totalWidth = (gridSize * (cubeSize + spacing)) - spacing;
         const startX = -totalWidth / 2;
 
-        const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-        const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+        const geometry = new THREE.BoxGeometry(cubeSize, 1, cubeSize);
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0x00ff99,
+            emissive: 0x00ff99,
+            emissiveIntensity: 0.5
+        });
 
         for (let i = 0; i < gridSize; i++) {
             const cube = new THREE.Mesh(geometry, material);
@@ -78,15 +86,28 @@ export class ThreeVisualizer extends Component<{}> {
         }
     }
 
-    // Dummy animation loop for now
     private animate = () => {
         requestAnimationFrame(this.animate);
 
-        // Make the bars go up and down with a sine wave for testing
-        const time = Date.now() * 0.001;
-        this.cubes.forEach((cube, i) => {
-            cube.scale.y = Math.sin(time + i) * 0.5 + 1;
-        });
+        const minScale = 0.1;
+        const maxHeight = 5;
+
+        if (this.analyser) {
+            const data = this.analyser.getFrequencyData();
+            this.cubes.forEach((cube, i) => {
+                const value = data[i];
+                const scale = Math.max(minScale, (value / 255) * maxHeight);
+                cube.scale.y = scale;
+                cube.position.y = scale / 2 - (maxHeight / 2) + 0.5; 
+            });
+        } else {
+            // If no audio is playing, set to the "zero" state.
+            this.cubes.forEach(cube => {
+                const scale = minScale;
+                cube.scale.y = scale;
+                cube.position.y = scale / 2 - (maxHeight / 2) + 0.5;
+            });
+        }
 
         this.renderer.render(this.scene, this.camera);
     }
