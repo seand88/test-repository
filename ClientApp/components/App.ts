@@ -3,6 +3,7 @@ import { StorageService } from '../services/StorageService.js';
 import { Breadcrumbs } from './Breadcrumbs.js';
 import { SearchBar } from './SearchBar.js';
 import { FileList } from './FileList.js';
+import { UploadForm } from './UploadForm.js';
 import { StorageContent } from '../models/Storage.js';
 
 export class App extends Component<{}> {
@@ -10,6 +11,7 @@ export class App extends Component<{}> {
     private breadcrumbs: Breadcrumbs;
     private searchBar: SearchBar;
     private fileList: FileList;
+    private uploadForm: UploadForm;
 
     private currentPath: string = '';
     private searchQuery: string = '';
@@ -26,6 +28,10 @@ export class App extends Component<{}> {
             () => this.loadData(),
             (path) => this.storageService.getDownloadUrl(path)
         );
+        this.uploadForm = new UploadForm(async (file) => {
+            await this.storageService.upload(this.currentPath, file);
+            this.loadData();
+        });
 
         this.initializeRouting();
     }
@@ -89,10 +95,10 @@ export class App extends Component<{}> {
     }
 
     protected render(): string {
-        // App is now just a static layout shell
         return `
             <div class="browser-container">
                 <div class="toolbar" id="toolbar-container"></div>
+                <div class="action-bar" id="action-bar-container"></div>
                 <div id="file-list-container"></div>
             </div>
         `;
@@ -101,11 +107,13 @@ export class App extends Component<{}> {
     protected addEventListeners(): void {
         // Mount sub-components into the newly rendered shell
         const toolbarContainer = this.element.querySelector('#toolbar-container');
+        const actionBarContainer = this.element.querySelector('#action-bar-container');
         const fileListContainer = this.element.querySelector('#file-list-container');
 
-        if (toolbarContainer && fileListContainer) {
+        if (toolbarContainer && actionBarContainer && fileListContainer) {
             this.breadcrumbs.mount(toolbarContainer as HTMLElement);
             this.searchBar.mount(toolbarContainer as HTMLElement);
+            this.uploadForm.mount(actionBarContainer as HTMLElement);
             this.fileList.mount(fileListContainer as HTMLElement);
         }
     }
