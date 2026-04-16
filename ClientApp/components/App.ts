@@ -7,6 +7,7 @@ import { UploadForm } from './UploadForm.js';
 import { Dialog } from './Dialog.js';
 import { FolderPicker } from './FolderPicker.js';
 import { AudioPlayer } from './AudioPlayer.js';
+import { ThreeVisualizer } from './ThreeVisualizer.js';
 import { StorageContent } from '../models/Storage.js';
 
 export class App extends Component<{}> {
@@ -17,6 +18,7 @@ export class App extends Component<{}> {
     private uploadForm: UploadForm;
     private dialog: Dialog;
     private audioPlayer: AudioPlayer;
+    private visualizer: ThreeVisualizer;
 
     private currentPath: string = '';
     private searchQuery: string = '';
@@ -27,6 +29,7 @@ export class App extends Component<{}> {
 
         this.dialog = new Dialog('', () => {});
         this.audioPlayer = new AudioPlayer();
+        this.visualizer = new ThreeVisualizer();
 
         // Initialize sub-components with their callbacks
         this.breadcrumbs = new Breadcrumbs((path) => this.navigateTo(path, ''));
@@ -130,6 +133,7 @@ export class App extends Component<{}> {
 
     protected render(): string {
         return `
+            <div id="visualizer-container"></div>
             <div class="browser-container">
                 <div class="toolbar" id="toolbar-container"></div>
                 <div class="action-bar" id="action-bar-container"></div>
@@ -141,13 +145,15 @@ export class App extends Component<{}> {
     }
 
     protected addEventListeners(): void {
+        const visualizerContainer = this.element.querySelector('#visualizer-container');
         const toolbarContainer = this.element.querySelector('#toolbar-container');
         const actionBarContainer = this.element.querySelector('#action-bar-container');
         const fileListContainer = this.element.querySelector('#file-list-container');
         const dialogContainer = this.element.querySelector('#dialog-container');
         const audioPlayerFooter = this.element.querySelector('#audio-player-footer');
 
-        if (toolbarContainer && actionBarContainer && fileListContainer && dialogContainer && audioPlayerFooter) {
+        if (visualizerContainer && toolbarContainer && actionBarContainer && fileListContainer && dialogContainer && audioPlayerFooter) {
+            this.visualizer.mount(visualizerContainer as HTMLElement);
             this.breadcrumbs.mount(toolbarContainer as HTMLElement);
             this.searchBar.mount(toolbarContainer as HTMLElement);
             this.uploadForm.mount(actionBarContainer as HTMLElement);
