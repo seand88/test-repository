@@ -1,3 +1,27 @@
+#Overview - AI Usage Description 
+
+I used AI, specifically gemini cli to help write some more tedious parts of the project. 
+Unit tests, etc.... 
+
+I also used it for some of the components. 
+Once I had the architecture I wanted in terms of the component system on the frontend, then I could ask AI to generate individual components. 
+Typically I like to only use it for small tasks, like a single component otherwise it can get out of hand. 
+Need to make sure it follows the architecture and scalability I am going for. 
+
+In terms of the backend design its all based on pathing for the deep linking strategy needed. 
+I also used AI to write some of the unit testing on the backend. 
+
+In my daily usage I will use AI for unit testing then review the tests etc... 
+Have to really watch every piece of code its touching to make sure what you want. 
+
+Overall im pleased with the design doing accomplishing this within 5-6 hours as thats all the time I have for this. 
+
+I really like the canvas element idea I used to render 3d in the background. This could really be anything you want, a full 3d scene or something to make things more visually interesting. 
+
+Thanks for taking the time to look at my project. see below for instructions. 
+
+
+
 # File Browser SPA - Code Test
 
 This project is a Single Page Application (SPA) built with a vanilla TypeScript frontend (using a custom component-based architecture) and a .NET Web API backend.
