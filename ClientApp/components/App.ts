@@ -8,6 +8,9 @@ import { Dialog } from './Dialog.js';
 import { FolderPicker } from './FolderPicker.js';
 import { AudioPlayer } from './AudioPlayer.js';
 import { ThreeVisualizer } from './ThreeVisualizer.js';
+import { VisualizerSwitcher, VisualizerType } from './VisualizerSwitcher.js';
+import { BarStrategy } from '../visualizers/BarStrategy.js';
+import { WaveStrategy } from '../visualizers/WaveStrategy.js';
 import { StorageContent } from '../models/Storage.js';
 
 export class App extends Component<{}> {
@@ -19,6 +22,7 @@ export class App extends Component<{}> {
     private dialog: Dialog;
     private audioPlayer: AudioPlayer;
     private visualizer: ThreeVisualizer;
+    private visualizerSwitcher: VisualizerSwitcher;
 
     private currentPath: string = '';
     private searchQuery: string = '';
@@ -30,6 +34,10 @@ export class App extends Component<{}> {
         this.dialog = new Dialog('', () => {});
         this.audioPlayer = new AudioPlayer();
         this.visualizer = new ThreeVisualizer();
+        this.visualizerSwitcher = new VisualizerSwitcher((type) => this.handleVisualizerSwitch(type));
+        
+        // Set the default visualizer strategy
+        this.visualizer.setStrategy(new BarStrategy());
 
         // Initialize sub-components with their callbacks
         this.breadcrumbs = new Breadcrumbs((path) => this.navigateTo(path, ''));
@@ -45,7 +53,6 @@ export class App extends Component<{}> {
                 const url = this.storageService.getDownloadUrl(path);
                 this.audioPlayer.play(url, name);
                 
-                // We need a slight delay to ensure the <audio> element is in the DOM
                 setTimeout(() => {
                     const audioElement = this.audioPlayer.getAudioElement();
                     if (audioElement) {
@@ -62,6 +69,14 @@ export class App extends Component<{}> {
         });
 
         this.initializeRouting();
+    }
+
+    private handleVisualizerSwitch(type: VisualizerType) {
+        if (type === 'bars') {
+            this.visualizer.setStrategy(new BarStrategy());
+        } else if (type === 'wave') {
+            this.visualizer.setStrategy(new WaveStrategy());
+        }
     }
 
     private handleMoveRequest(sourcePath: string) {
@@ -120,7 +135,6 @@ export class App extends Component<{}> {
     }
 
     private async loadData() {
-        // Update children to reflect loading state
         this.breadcrumbs.updatePath(this.currentPath);
         this.searchBar.updateQuery(this.searchQuery);
         this.fileList.updateData(null, true, null);
@@ -165,6 +179,7 @@ export class App extends Component<{}> {
             this.breadcrumbs.mount(toolbarContainer as HTMLElement);
             this.searchBar.mount(toolbarContainer as HTMLElement);
             this.uploadForm.mount(actionBarContainer as HTMLElement);
+            this.visualizerSwitcher.mount(actionBarContainer as HTMLElement); // Add switcher to action bar
             this.fileList.mount(fileListContainer as HTMLElement);
             this.dialog.mount(dialogContainer as HTMLElement);
             this.audioPlayer.mount(audioPlayerFooter as HTMLElement);

@@ -1,13 +1,14 @@
 import { Component } from '../core/Component.js';
 import * as THREE from 'three';
+import { IVisualizerStrategy } from '../visualizers/IVisualizerStrategy.js';
 
 export class ThreeVisualizer extends Component<{}> {
     private scene!: THREE.Scene;
     private camera!: THREE.PerspectiveCamera;
     private renderer!: THREE.WebGLRenderer;
-    private cubes: THREE.Mesh[] = [];
     private analyser: THREE.AudioAnalyser | null = null;
     private isAudioConnected = false;
+    private currentStrategy: IVisualizerStrategy | null = null;
 
     constructor() {
         super({});
@@ -19,10 +20,7 @@ export class ThreeVisualizer extends Component<{}> {
         this.element.style.zIndex = '-1';
     }
 
-    // We don't render HTML, we mount a canvas
-    protected render(): string {
-        return ``; 
-    }
+    protected render(): string { return ``; }
 
     public mount(container: HTMLElement) {
         container.appendChild(this.element);
@@ -36,9 +34,22 @@ export class ThreeVisualizer extends Component<{}> {
         const listener = new THREE.AudioListener();
         const audio = new THREE.Audio(listener);
         audio.setMediaElementSource(audioElement);
-        this.analyser = new THREE.AudioAnalyser(audio, 32); // 32 is the FFT size (must be power of 2)
+        this.analyser = new THREE.AudioAnalyser(audio, 32);
 
         this.isAudioConnected = true;
+    }
+
+    public setStrategy(strategy: IVisualizerStrategy) {
+        if (this.currentStrategy) {
+            this.currentStrategy.dispose(this.scene);
+        }
+        this.currentStrategy = strategy;
+
+        // If the scene already exists, initialize the new strategy immediately.
+        // Otherwise, it will be initialized by initThree().
+        if (this.scene) {
+            this.currentStrategy.init(this.scene);
+        }
     }
 
     private initThree() {
@@ -65,48 +76,28 @@ export class ThreeVisualizer extends Component<{}> {
         pointLight.position.set(2, 3, 4);
         this.scene.add(pointLight);
 
-        const gridSize = 16; // Corresponds to half the FFT size (32 / 2)
-        const cubeSize = 0.5;
-        const spacing = 0.2;
-        const totalWidth = (gridSize * (cubeSize + spacing)) - spacing;
-        const startX = -totalWidth / 2;
-
-        const geometry = new THREE.BoxGeometry(cubeSize, 1, cubeSize);
-        const material = new THREE.MeshStandardMaterial({ 
-            color: 0x00ff99,
-            emissive: 0x00ff99,
-            emissiveIntensity: 0.5
-        });
-
-        for (let i = 0; i < gridSize; i++) {
-            const cube = new THREE.Mesh(geometry, material);
-            cube.position.x = startX + i * (cubeSize + spacing);
-            this.scene.add(cube);
-            this.cubes.push(cube);
+        // If a strategy was set before we were mounted, initialize it now.
+        if (this.currentStrategy) {
+            this.currentStrategy.init(this.scene);
         }
     }
 
     private animate = () => {
         requestAnimationFrame(this.animate);
 
-        const minScale = 0.1;
-        const maxHeight = 5;
-
-        if (this.analyser) {
-            const data = this.analyser.getFrequencyData();
-            this.cubes.forEach((cube, i) => {
-                const value = data[i];
-                const scale = Math.max(minScale, (value / 255) * maxHeight);
-                cube.scale.y = scale;
-                cube.position.y = scale / 2 - (maxHeight / 2) + 0.5; 
-            });
+        // Camera rotation logic: only rotate when audio is playing
+        if (this.analyser) { 
+            this.camera.position.x = Math.sin(Date.now() * 0.0001) * 10;
+            this.camera.position.z = Math.cos(Date.now() * 0.0001) * 10;
+            this.camera.lookAt(this.scene.position);
         } else {
-            // If no audio is playing, set to the "zero" state.
-            this.cubes.forEach(cube => {
-                const scale = minScale;
-                cube.scale.y = scale;
-                cube.position.y = scale / 2 - (maxHeight / 2) + 0.5;
-            });
+            // Reset camera position when no audio is playing
+            this.camera.position.set(0, 0, 5);
+            this.camera.lookAt(this.scene.position);
+        }
+
+        if (this.currentStrategy) {
+            this.currentStrategy.update(this.analyser); // Pass analyser or null
         }
 
         this.renderer.render(this.scene, this.camera);

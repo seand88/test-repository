@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using TestProject.Models;
 
 namespace TestProject.Services;
