@@ -1,0 +1,27 @@
+The task is to create a web service API that allows users to query the contents of a directory on the web server
+and a single page web app that can be used to search and browse folders and files. A server side home
+directory should be configurable via variable.
+Client side, the application should be deep-linkable (the state of the UI should be kept in the URL). All of the
+UI work should be done client side via JavaScript that renders HTML - do not render HTML server side.
+Styling is not as important for this task, we are more concerned with functionality. Build the UI using vanilla
+JavaScript or TypeScript (without React, Angular, or other UI library)
+The goal is to produce a functional proof-of-concept to let us see how you think. It is important to provide a
+decent body of code, so that we can talk about your logic and choices. It isn’t important to make the UI
+“pretty”.
+The point of this exercise is to end up with a body of work that is big enough that our team can review it and
+evaluate your design and coding style and skills.
+
+Requirements
+● Ensure your solution builds in Visual Studio (any version 2022 or newer is acceptable), Rider, VS Code,
+or command line SDK tools
+● Web API that allows Browse and Search Files & Folders and returns JSON
+● Deep linkable URL pattern
+● SPA (Single Page App using JavaScript)
+● Upload/download files from the browser
+● Show file and folder counts and sizes for the current view
+● Build the UI using vanilla JavaScript or TypeScript (without React, Angular, or other UI library)
+Bonus
+● Any cool stuff you want to show :)
+● Entire component contained in a dialog widget, with a trigger element (button, etc)
+● Delete, move, copy files and folders
+● Performance - performance is highly valued
