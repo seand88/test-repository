@@ -6,6 +6,7 @@ import { FileList } from './FileList.js';
 import { UploadForm } from './UploadForm.js';
 import { Dialog } from './Dialog.js';
 import { FolderPicker } from './FolderPicker.js';
+import { AudioPlayer } from './AudioPlayer.js';
 import { StorageContent } from '../models/Storage.js';
 
 export class App extends Component<{}> {
@@ -15,6 +16,7 @@ export class App extends Component<{}> {
     private fileList: FileList;
     private uploadForm: UploadForm;
     private dialog: Dialog;
+    private audioPlayer: AudioPlayer;
 
     private currentPath: string = '';
     private searchQuery: string = '';
@@ -24,6 +26,7 @@ export class App extends Component<{}> {
         this.storageService = new StorageService();
 
         this.dialog = new Dialog('', () => {});
+        this.audioPlayer = new AudioPlayer();
 
         // Initialize sub-components with their callbacks
         this.breadcrumbs = new Breadcrumbs((path) => this.navigateTo(path, ''));
@@ -34,6 +37,10 @@ export class App extends Component<{}> {
             async (path) => {
                 await this.storageService.delete(path);
                 this.loadData();
+            },
+            (path, name) => {
+                const url = this.storageService.getDownloadUrl(path);
+                this.audioPlayer.play(url, name);
             },
             () => this.loadData(),
             (path) => this.storageService.getDownloadUrl(path)
@@ -51,7 +58,7 @@ export class App extends Component<{}> {
             try {
                 await this.storageService.move(sourcePath, destinationPath);
                 this.dialog.close();
-                this.loadData(); // Refresh to see the item moved
+                this.loadData();
             } catch (err: any) {
                 alert(err.message || 'Failed to move item.');
             }
@@ -61,7 +68,6 @@ export class App extends Component<{}> {
         const itemName = sourcePath.split('/').pop() || sourcePath;
         this.dialog.open(`Move '${itemName}'`);
         
-        // Start loading the root or current path in the picker
         folderPicker.loadPath(''); 
     }
 
@@ -116,7 +122,6 @@ export class App extends Component<{}> {
                 content = await this.storageService.browse(this.currentPath);
             }
             
-            // Pass the loaded data to the FileList component
             this.fileList.updateData(content, false, null);
         } catch (err: any) {
             this.fileList.updateData(null, false, err.message || 'An error occurred');
@@ -130,23 +135,25 @@ export class App extends Component<{}> {
                 <div class="action-bar" id="action-bar-container"></div>
                 <div id="file-list-container"></div>
                 <div id="dialog-container"></div>
+                <div id="audio-player-footer"></div>
             </div>
         `;
     }
 
     protected addEventListeners(): void {
-        // Mount sub-components into the newly rendered shell
         const toolbarContainer = this.element.querySelector('#toolbar-container');
         const actionBarContainer = this.element.querySelector('#action-bar-container');
         const fileListContainer = this.element.querySelector('#file-list-container');
         const dialogContainer = this.element.querySelector('#dialog-container');
+        const audioPlayerFooter = this.element.querySelector('#audio-player-footer');
 
-        if (toolbarContainer && actionBarContainer && fileListContainer && dialogContainer) {
+        if (toolbarContainer && actionBarContainer && fileListContainer && dialogContainer && audioPlayerFooter) {
             this.breadcrumbs.mount(toolbarContainer as HTMLElement);
             this.searchBar.mount(toolbarContainer as HTMLElement);
             this.uploadForm.mount(actionBarContainer as HTMLElement);
             this.fileList.mount(fileListContainer as HTMLElement);
             this.dialog.mount(dialogContainer as HTMLElement);
+            this.audioPlayer.mount(audioPlayerFooter as HTMLElement);
         }
     }
 }

@@ -100,6 +100,26 @@
         .picker-folder-item a { color: #333; text-decoration: none; display: inline-block; width: 80%; }
         .picker-folder-item a:hover { text-decoration: underline; color: #0066cc; }
         .picker-footer { text-align: right; border-top: 1px solid #eee; padding-top: 10px; }
+        
+        /* Audio Player Styles */
+        #audio-player-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #222;
+            color: white;
+            z-index: 100;
+        }
+        .audio-player-container .audio-player {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .audio-player .track-info { margin-right: 20px; font-weight: bold; }
+        .audio-player audio { flex-grow: 1; }
     </style>
 </head>
 <body>

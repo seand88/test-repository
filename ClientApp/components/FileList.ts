@@ -11,14 +11,16 @@ export class FileList extends Component<FileListState> {
     private onNavigate: (path: string) => void;
     private onMove: (path: string) => void;
     private onDelete: (path: string) => Promise<void>;
+    private onPlay: (path: string, fileName: string) => void;
     private onRetry: () => void;
     private getDownloadUrl: (path: string) => string;
 
-    constructor(onNavigate: (path: string) => void, onMove: (path: string) => void, onDelete: (path: string) => Promise<void>, onRetry: () => void, getDownloadUrl: (path: string) => string) {
+    constructor(onNavigate: (path: string) => void, onMove: (path: string) => void, onDelete: (path: string) => Promise<void>, onPlay: (path: string, fileName: string) => void, onRetry: () => void, getDownloadUrl: (path: string) => string) {
         super({ content: null, isLoading: true, error: null });
         this.onNavigate = onNavigate;
         this.onMove = onMove;
         this.onDelete = onDelete;
+        this.onPlay = onPlay;
         this.onRetry = onRetry;
         this.getDownloadUrl = getDownloadUrl;
         this.element.className = 'file-list-container';
@@ -50,9 +52,12 @@ export class FileList extends Component<FileListState> {
 
         return sortedItems.map(item => {
             const isFolder = item.type === StorageItemType.Folder;
+            const isMp3 = item.extension.toLowerCase() === '.mp3';
             const icon = isFolder ? '📁' : '📄';
             const sizeStr = isFolder ? '--' : this.formatSize(item.size);
             const dateStr = new Date(item.lastModified).toLocaleString();
+
+            const playButton = isMp3 ? `<button class="btn-play" data-path="${item.relativePath}" data-name="${item.name}" title="Play">▶️</button>` : '';
 
             return `
                 <div class="list-item ${isFolder ? 'folder' : 'file'}" data-path="${item.relativePath}">
@@ -66,6 +71,7 @@ export class FileList extends Component<FileListState> {
                     <div class="item-size">${sizeStr}</div>
                     <div class="item-date">${dateStr}</div>
                     <div class="item-actions">
+                        ${playButton}
                         ${!isFolder ? `<a href="${this.getDownloadUrl(item.relativePath)}" target="_blank" title="Download">⬇️</a>` : ''}
                         <button class="btn-move" data-path="${item.relativePath}" title="Move">📤</button>
                         <button class="btn-delete" data-path="${item.relativePath}" title="Delete">🗑️</button>
@@ -108,6 +114,16 @@ export class FileList extends Component<FileListState> {
                 e.preventDefault();
                 const path = (e.currentTarget as HTMLElement).getAttribute('data-path') || '';
                 this.onNavigate(path);
+            });
+        });
+
+        const playButtons = this.element.querySelectorAll('.btn-play');
+        playButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.currentTarget as HTMLElement;
+                const path = target.getAttribute('data-path') || '';
+                const name = target.getAttribute('data-name') || '';
+                this.onPlay(path, name);
             });
         });
 
