@@ -25,6 +25,10 @@ export class App extends Component<{}> {
         this.searchBar = new SearchBar((query) => this.navigateTo(this.currentPath, query));
         this.fileList = new FileList(
             (path) => this.navigateTo(path, ''),
+            async (path) => {
+                await this.storageService.delete(path);
+                this.loadData();
+            },
             () => this.loadData(),
             (path) => this.storageService.getDownloadUrl(path)
         );

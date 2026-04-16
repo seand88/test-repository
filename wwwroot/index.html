@@ -60,8 +60,10 @@
         .item-name .icon { margin-right: 10px; font-size: 1.2em; }
         .item-size { flex: 1; text-align: right; }
         .item-date { flex: 1; text-align: right; }
-        .item-actions { flex: 0.5; text-align: center; }
-        .item-actions a { text-decoration: none; }
+        .item-actions { flex: 0.5; text-align: center; display: flex; justify-content: space-evenly; align-items: center; }
+        .item-actions a, .btn-delete { text-decoration: none; border: none; background: none; cursor: pointer; padding: 5px; border-radius: 4px; font-size: 1.1em; }
+        .item-actions a:hover, .btn-delete:hover { background-color: #f0f0f0; }
+        .btn-delete:hover { color: #d32f2f; }
         
         .loading, .empty-state, .error-container {
             padding: 40px;

@@ -9,12 +9,14 @@ interface FileListState {
 
 export class FileList extends Component<FileListState> {
     private onNavigate: (path: string) => void;
+    private onDelete: (path: string) => Promise<void>;
     private onRetry: () => void;
     private getDownloadUrl: (path: string) => string;
 
-    constructor(onNavigate: (path: string) => void, onRetry: () => void, getDownloadUrl: (path: string) => string) {
+    constructor(onNavigate: (path: string) => void, onDelete: (path: string) => Promise<void>, onRetry: () => void, getDownloadUrl: (path: string) => string) {
         super({ content: null, isLoading: true, error: null });
         this.onNavigate = onNavigate;
+        this.onDelete = onDelete;
         this.onRetry = onRetry;
         this.getDownloadUrl = getDownloadUrl;
         this.element.className = 'file-list-container';
@@ -62,7 +64,8 @@ export class FileList extends Component<FileListState> {
                     <div class="item-size">${sizeStr}</div>
                     <div class="item-date">${dateStr}</div>
                     <div class="item-actions">
-                        ${!isFolder ? `<a href="${this.getDownloadUrl(item.relativePath)}" target="_blank">⬇️</a>` : ''}
+                        ${!isFolder ? `<a href="${this.getDownloadUrl(item.relativePath)}" target="_blank" title="Download">⬇️</a>` : ''}
+                        <button class="btn-delete" data-path="${item.relativePath}" title="Delete">🗑️</button>
                     </div>
                 </div>
             `;
@@ -102,6 +105,16 @@ export class FileList extends Component<FileListState> {
                 e.preventDefault();
                 const path = (e.currentTarget as HTMLElement).getAttribute('data-path') || '';
                 this.onNavigate(path);
+            });
+        });
+
+        const deleteButtons = this.element.querySelectorAll('.btn-delete');
+        deleteButtons.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const path = (e.currentTarget as HTMLElement).getAttribute('data-path') || '';
+                if (confirm(`Are you sure you want to delete this ${path.includes('.') ? 'file' : 'folder'}?`)) {
+                    await this.onDelete(path);
+                }
             });
         });
 
