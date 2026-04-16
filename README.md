@@ -12,7 +12,7 @@ This project is a Single Page Application (SPA) built with a vanilla TypeScript 
 ## Prerequisites
 
 To build and run this project, you need:
-1.  [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+1.  [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 2.  [Node.js](https://nodejs.org/) (which includes `npm`)
 
 ## How to Run the Application

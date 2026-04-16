@@ -1,6 +1,0 @@
--- I have been using gemini cli lately, so I wanted to use that here just to help with some boilerplate things to save time.
--- I used it to get the app structure correct, create my tsconfig and get things compiling correctly from a base standpoint.
-
--- while we shouldn't use a modern js framework, I am a fan of components and dependency injection.
--- I thought it might be fun to try to incorporate those concepts in my frontend 
-

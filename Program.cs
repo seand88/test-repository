@@ -6,6 +6,7 @@ namespace TestProject {
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddScoped<TestProject.Services.IStorageProvider, TestProject.Services.LocalDiskStorageProvider>();
 
             var app = builder.Build();
 
@@ -13,6 +14,7 @@ namespace TestProject {
 
             app.UseHttpsRedirection();
 
+            app.UseDefaultFiles();
             app.UseStaticFiles();
 
             app.MapControllers();
