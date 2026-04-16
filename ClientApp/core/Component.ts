@@ -1,6 +1,6 @@
 export abstract class Component<TState = {}> {
     protected state: TState;
-    protected element: HTMLElement;
+    public element: HTMLElement;
 
     constructor(initialState?: TState) {
         this.state = initialState || {} as TState;
