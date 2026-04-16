@@ -103,4 +103,18 @@ public class FilesController : ControllerBase
             return StatusCode(500, new { message = ex.Message });
         }
     }
+
+    [HttpPost("move")]
+    public async Task<IActionResult> Move([FromQuery] string sourcePath, [FromQuery] string destinationPath)
+    {
+        try
+        {
+            await _storageProvider.MoveAsync(sourcePath ?? "", destinationPath ?? "");
+            return Ok(new { message = "Moved successfully." });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
 }

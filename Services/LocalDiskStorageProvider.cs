@@ -171,4 +171,37 @@ public class LocalDiskStorageProvider : IStorageProvider
         }
         return Task.CompletedTask;
     }
+
+    public Task MoveAsync(string sourcePath, string destinationPath)
+    {
+        var physicalSource = GetPhysicalPath(sourcePath);
+        var physicalDest = GetPhysicalPath(destinationPath);
+
+        if (!File.Exists(physicalSource) && !Directory.Exists(physicalSource))
+        {
+            throw new FileNotFoundException($"Source not found: {sourcePath}");
+        }
+
+        if (!Directory.Exists(physicalDest))
+        {
+            throw new DirectoryNotFoundException($"Destination directory not found: {destinationPath}");
+        }
+
+        if (Directory.Exists(physicalSource))
+        {
+            var dirName = new DirectoryInfo(physicalSource).Name;
+            var targetPath = Path.Combine(physicalDest, dirName);
+            if (Directory.Exists(targetPath)) throw new InvalidOperationException("Destination already exists.");
+            Directory.Move(physicalSource, targetPath);
+        }
+        else
+        {
+            var fileName = Path.GetFileName(physicalSource);
+            var targetPath = Path.Combine(physicalDest, fileName);
+            if (File.Exists(targetPath)) throw new InvalidOperationException("Destination already exists.");
+            File.Move(physicalSource, targetPath);
+        }
+        
+        return Task.CompletedTask;
+    }
 }

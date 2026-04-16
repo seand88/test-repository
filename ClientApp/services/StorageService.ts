@@ -19,6 +19,15 @@ export class StorageService {
         return await response.json();
     }
 
+    public async move(sourcePath: string, destinationPath: string): Promise<void> {
+        const response = await fetch(`${this.baseUrl}/move?sourcePath=${encodeURIComponent(sourcePath)}&destinationPath=${encodeURIComponent(destinationPath)}`, {
+            method: 'POST'
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to move: ${sourcePath}`);
+        }
+    }
+
     public async delete(path: string): Promise<void> {
         const response = await fetch(`${this.baseUrl}?path=${encodeURIComponent(path)}`, {
             method: 'DELETE'

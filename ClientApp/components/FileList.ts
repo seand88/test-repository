@@ -9,13 +9,15 @@ interface FileListState {
 
 export class FileList extends Component<FileListState> {
     private onNavigate: (path: string) => void;
+    private onMove: (path: string) => void;
     private onDelete: (path: string) => Promise<void>;
     private onRetry: () => void;
     private getDownloadUrl: (path: string) => string;
 
-    constructor(onNavigate: (path: string) => void, onDelete: (path: string) => Promise<void>, onRetry: () => void, getDownloadUrl: (path: string) => string) {
+    constructor(onNavigate: (path: string) => void, onMove: (path: string) => void, onDelete: (path: string) => Promise<void>, onRetry: () => void, getDownloadUrl: (path: string) => string) {
         super({ content: null, isLoading: true, error: null });
         this.onNavigate = onNavigate;
+        this.onMove = onMove;
         this.onDelete = onDelete;
         this.onRetry = onRetry;
         this.getDownloadUrl = getDownloadUrl;
@@ -65,6 +67,7 @@ export class FileList extends Component<FileListState> {
                     <div class="item-date">${dateStr}</div>
                     <div class="item-actions">
                         ${!isFolder ? `<a href="${this.getDownloadUrl(item.relativePath)}" target="_blank" title="Download">⬇️</a>` : ''}
+                        <button class="btn-move" data-path="${item.relativePath}" title="Move">📤</button>
                         <button class="btn-delete" data-path="${item.relativePath}" title="Delete">🗑️</button>
                     </div>
                 </div>
@@ -105,6 +108,14 @@ export class FileList extends Component<FileListState> {
                 e.preventDefault();
                 const path = (e.currentTarget as HTMLElement).getAttribute('data-path') || '';
                 this.onNavigate(path);
+            });
+        });
+
+        const moveButtons = this.element.querySelectorAll('.btn-move');
+        moveButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const path = (e.currentTarget as HTMLElement).getAttribute('data-path') || '';
+                this.onMove(path);
             });
         });
 

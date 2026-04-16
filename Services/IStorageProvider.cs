@@ -28,6 +28,11 @@ public interface IStorageProvider
     Task UploadFileAsync(string path, string fileName, Stream stream);
 
     /// <summary>
+    /// Moves a file or folder to a new destination path.
+    /// </summary>
+    Task MoveAsync(string sourcePath, string destinationPath);
+
+    /// <summary>
     /// Deletes a file or folder.
     /// </summary>
     Task DeleteAsync(string path);

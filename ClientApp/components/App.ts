@@ -4,6 +4,8 @@ import { Breadcrumbs } from './Breadcrumbs.js';
 import { SearchBar } from './SearchBar.js';
 import { FileList } from './FileList.js';
 import { UploadForm } from './UploadForm.js';
+import { Dialog } from './Dialog.js';
+import { FolderPicker } from './FolderPicker.js';
 import { StorageContent } from '../models/Storage.js';
 
 export class App extends Component<{}> {
@@ -12,6 +14,7 @@ export class App extends Component<{}> {
     private searchBar: SearchBar;
     private fileList: FileList;
     private uploadForm: UploadForm;
+    private dialog: Dialog;
 
     private currentPath: string = '';
     private searchQuery: string = '';
@@ -20,11 +23,14 @@ export class App extends Component<{}> {
         super({});
         this.storageService = new StorageService();
 
+        this.dialog = new Dialog('', () => {});
+
         // Initialize sub-components with their callbacks
         this.breadcrumbs = new Breadcrumbs((path) => this.navigateTo(path, ''));
         this.searchBar = new SearchBar((query) => this.navigateTo(this.currentPath, query));
         this.fileList = new FileList(
             (path) => this.navigateTo(path, ''),
+            (path) => this.handleMoveRequest(path),
             async (path) => {
                 await this.storageService.delete(path);
                 this.loadData();
@@ -38,6 +44,25 @@ export class App extends Component<{}> {
         });
 
         this.initializeRouting();
+    }
+
+    private handleMoveRequest(sourcePath: string) {
+        const folderPicker = new FolderPicker(this.storageService, async (destinationPath) => {
+            try {
+                await this.storageService.move(sourcePath, destinationPath);
+                this.dialog.close();
+                this.loadData(); // Refresh to see the item moved
+            } catch (err: any) {
+                alert(err.message || 'Failed to move item.');
+            }
+        });
+
+        this.dialog.setContent(folderPicker);
+        const itemName = sourcePath.split('/').pop() || sourcePath;
+        this.dialog.open(`Move '${itemName}'`);
+        
+        // Start loading the root or current path in the picker
+        folderPicker.loadPath(''); 
     }
 
     private initializeRouting() {
@@ -104,6 +129,7 @@ export class App extends Component<{}> {
                 <div class="toolbar" id="toolbar-container"></div>
                 <div class="action-bar" id="action-bar-container"></div>
                 <div id="file-list-container"></div>
+                <div id="dialog-container"></div>
             </div>
         `;
     }
@@ -113,12 +139,14 @@ export class App extends Component<{}> {
         const toolbarContainer = this.element.querySelector('#toolbar-container');
         const actionBarContainer = this.element.querySelector('#action-bar-container');
         const fileListContainer = this.element.querySelector('#file-list-container');
+        const dialogContainer = this.element.querySelector('#dialog-container');
 
-        if (toolbarContainer && actionBarContainer && fileListContainer) {
+        if (toolbarContainer && actionBarContainer && fileListContainer && dialogContainer) {
             this.breadcrumbs.mount(toolbarContainer as HTMLElement);
             this.searchBar.mount(toolbarContainer as HTMLElement);
             this.uploadForm.mount(actionBarContainer as HTMLElement);
             this.fileList.mount(fileListContainer as HTMLElement);
+            this.dialog.mount(dialogContainer as HTMLElement);
         }
     }
 }
