@@ -14,7 +14,7 @@ I also used AI to write some of the unit testing on the backend.
 In my daily usage I will use AI for unit testing then review the tests etc... 
 Have to really watch every piece of code its touching to make sure what you want. 
 
-Overall im pleased with the design doing accomplishing this within 5-6 hours as thats all the time I have for this. 
+Overall im pleased with the design accomplishing this within 5-6 hours as thats all the time I have for this. 
 
 I really like the canvas element idea I used to render 3d in the background. This could really be anything you want, a full 3d scene or something to make things more visually interesting. 
 
