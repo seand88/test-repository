@@ -1,6 +1,6 @@
 # File Browser SPA - Code Test
 
-This project is a Single Page Application (SPA) built with a vanilla TypeScript frontend (using a custom component-based architecture) and an ASP.NET Core 8 Web API backend.
+This project is a Single Page Application (SPA) built with a vanilla TypeScript frontend (using a custom component-based architecture) and a .NET Web API backend.
 
 ## Project Structure
 
